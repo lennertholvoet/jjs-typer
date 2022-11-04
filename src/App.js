@@ -41,7 +41,11 @@ const App = () => {
       }
       setDutchVoices(arr)
   },[voices])
-
+/*
+  useEffect(() => {
+    speak({ text : 'Welkom!'  , voice })
+  },[voiceIndex])
+*/
   const chooseWord = () => {
     setCorrect('olive')
     setTyped('')
