@@ -30,6 +30,7 @@ const App = () => {
   const { speak , voices } = useSpeechSynthesis()
   const voice = useVoice
   const [dutchVoices,setDutchVoices] = useState(voices)
+  const [isDutch,setIsDutch] = useState(false)
   
   useEffect(() => {
     let useV = voices
@@ -42,7 +43,10 @@ const App = () => {
       }
     }
     setDutchVoices(useV)
-    if(useV.length > 0) setUseVoice(dutchVoices[0])
+    if(useV.length > 0) { 
+      setUseVoice(dutchVoices[0])
+      setIsDutch(true)
+    }
   },[voices,dutchVoices])
 
   const chooseWord = () => {
@@ -130,7 +134,7 @@ const App = () => {
       { word === '' &&
         <Button onClick={() => chooseWord()} size='massive'>START</Button>
       }
-      { dutchVoices.length === 0 &&
+      { !isDutch &&
         <Message
           icon='warning sign'
           header='Geen Nederlands taalpakket in je browser geïnstalleerd.'
