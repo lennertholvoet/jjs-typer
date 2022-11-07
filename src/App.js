@@ -28,24 +28,21 @@ const App = () => {
   //const [voiceIndex, setVoiceIndex] = useState(null)
   const [useVoice , setUseVoice] = useState(null)
   const { speak , voices } = useSpeechSynthesis()
-  const voice = useVoice
-  const [dutchVoices,setDutchVoices] = useState(voices)
-  const [isDutch,setIsDutch] = useState(false)
+  const voice = useVoice || null
+  const [dutchVoices,setDutchVoices] = useState([])
   
   useEffect(() => {
     let useV = voices
     for(let i = 0 ; i < voices.length ; i++) {
-      //console.log(voices[i])
       if(useV[i].lang.substring(0,2) !== 'nl') {
         useV.splice(i,1)
-      } else {
-        console.log(voices[i])
       }
     }
-    setDutchVoices(useV)
     if(useV.length > 0) { 
-      setUseVoice(dutchVoices[0])
-      setIsDutch(true)
+      setDutchVoices(useV)
+      setUseVoice(useV[0])
+    } else {
+      setDutchVoices([])
     }
   },[voices,dutchVoices])
 
@@ -77,9 +74,7 @@ const App = () => {
     if(typedInput !== '') {  
       let typedCompare = typedInput.toLowerCase()
       let wordCompare = word.toLowerCase()
-      console.log(typedCompare)
       let numTyped = typedCompare.length
-      console.log(typedCompare.charAt(numTyped - 1))
       speak({ text : typedCompare.charAt(numTyped - 1) , voice })
       if(typedCompare.charAt(numTyped - 1) !== wordCompare.charAt(numTyped - 1)) {
         setTyped(typedCompare.slice(0,-1))
@@ -134,22 +129,21 @@ const App = () => {
       { word === '' &&
         <Button onClick={() => chooseWord()} size='massive'>START</Button>
       }
-      { !isDutch &&
+      { dutchVoices.length === 0 &&
         <Message
           icon='warning sign'
           header='Geen Nederlands taalpakket in je browser geïnstalleerd.'
           content='We kunnen geen Nederlandse stem in je browser vinden. De woorden en letters kunnen dus een beetje gek klinken.'
         />
       }
-      
-        {word !== '' &&
-          <div>
-            <Segment size='massive' inverted color={correct}>
-              {word}
-            </Segment>
-            <Input disabled={disabled} size='massive' value={typed} onChange={e => checkTyped(e.target.value)}/>
-           </div>
-        }     
+      {word !== '' &&
+        <div>
+           <Segment size='massive' inverted color={correct}>
+            {word}
+          </Segment>
+          <Input disabled={disabled} size='massive' value={typed} onChange={e => checkTyped(e.target.value)}/>
+          </div>
+      }     
     </Container>
     </div>
   );
