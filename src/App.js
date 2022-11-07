@@ -9,7 +9,7 @@ import {
   Menu,
   Segment,
   Input ,
-  Dropdown
+  Message
 } from 'semantic-ui-react'
 import useSound from 'use-sound';
 import thumb from "./images/thumb.png"
@@ -25,27 +25,26 @@ const App = () => {
   const [typed,setTyped] = useState('')
   const [disabled,setDisabled] = useState(false)
   const [correct,setCorrect] = useState('olive')
-  const [voiceIndex, setVoiceIndex] = useState(null)
+  //const [voiceIndex, setVoiceIndex] = useState(null)
+  const [useVoice , setUseVoice] = useState(null)
   const { speak , voices } = useSpeechSynthesis()
-  const voice = voices[voiceIndex] || null
-
-  const [useDutchVoices,setDutchVoices] = useState([])
-
+  const voice = useVoice
+  const [dutchVoices,setDutchVoices] = useState(voices)
+  
   useEffect(() => {
-    let arr = []
-    let firstDutch = ''
-    for(let i = 0 ; i < voices.length ; i++)
-      if(voices[i].lang.substring(0,2) === 'nl') {
-        arr[i] = (voices[i])
-        if(firstDutch === '') { setVoiceIndex(i) }  
+    let useV = voices
+    for(let i = 0 ; i < voices.length ; i++) {
+      //console.log(voices[i])
+      if(useV[i].lang.substring(0,2) !== 'nl') {
+        useV.splice(i,1)
+      } else {
+        console.log(voices[i])
       }
-      setDutchVoices(arr)
-  },[voices])
-/*
-  useEffect(() => {
-    speak({ text : 'Welkom!'  , voice })
-  },[voiceIndex])
-*/
+    }
+    setDutchVoices(useV)
+    if(useV.length > 0) setUseVoice(dutchVoices[0])
+  },[voices,dutchVoices])
+
   const chooseWord = () => {
     setCorrect('olive')
     setTyped('')
@@ -84,6 +83,7 @@ const App = () => {
         setTimeout(() => {
           playError()
         },750)
+        
       } else {
         setTyped(typedCompare)
         setCorrect('green')
@@ -117,22 +117,9 @@ const App = () => {
           <Image size='mini' src={thumb} style={{ marginRight: '1.5em' }} />
           JJs Typer
         </Menu.Item>
-        <Menu.Item position='right'><Button onClick={() => toggleCap()}>{capLabel}</Button></Menu.Item>
-        {useDutchVoices.length > 0 && 
-        <Dropdown item simple text='Taal' closeOnChange>
-          <Dropdown.Menu>
-          {useDutchVoices.map((option, index) => (
-              <Dropdown.Item key={option.voiceURI} value={index} onClick={() => setVoiceIndex(index)}>
-                {`${option.name}`}
-              </Dropdown.Item>
-
-          ))}
-          </Dropdown.Menu>
-        </Dropdown>
-        }
-        {useDutchVoices.length === 0 &&
-            <Menu.Item>Installeer NL Spraak</Menu.Item>
-        }
+        <Menu.Item position='right'>
+          <Button onClick={() => toggleCap()}>{capLabel}</Button>
+        </Menu.Item>    
         <Menu.Item position='right'>About</Menu.Item>
       </Container>
     </Menu>
@@ -143,6 +130,13 @@ const App = () => {
       { word === '' &&
         <Button onClick={() => chooseWord()} size='massive'>START</Button>
       }
+      { dutchVoices.length === 0 &&
+        <Message
+          icon='warning sign'
+          header='Geen Nederlands taalpakket in je browser geïnstalleerd.'
+          content='We kunnen geen Nederlandse stem in je browser vinden. De woorden en letters kunnen dus een beetje gek klinken.'
+        />
+      }
       
         {word !== '' &&
           <div>
@@ -151,14 +145,7 @@ const App = () => {
             </Segment>
             <Input disabled={disabled} size='massive' value={typed} onChange={e => checkTyped(e.target.value)}/>
            </div>
-        }
-        {
-          /*
-            <Button onClick={() => chooseWord()}>TESTING</Button> 
-          */
-        }
-        
-     
+        }     
     </Container>
     </div>
   );
